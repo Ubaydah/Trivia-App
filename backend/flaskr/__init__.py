@@ -3,23 +3,37 @@ from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
-
 from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+
 def create_app(test_config=None):
     # create and configure the app
-    app = Flask(__name__)
+    app = Flask(__name__, instance_relative_config=True)
     setup_db(app)
-
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
     """
+
+    @app.after_request
+    def after_request(response):
+        response.headers.add(
+            "Access-Control-Allow-Headers", "Content-Type, Authorization"
+        )
+        response.headers.add(
+            "Access-Control-Allow-Headers", "GET, POST, PATCH, DELETE, OPTIONS"
+        )
+        return response
+
+    @app.route("/")
+    def hello_world():
+        return jsonify({"message": "hello world"})
 
     """
     @TODO:
@@ -27,6 +41,19 @@ def create_app(test_config=None):
     for all available categories.
     """
 
+    @app.route("/api/categories")
+    def get_all_categories():
+        categories = Category.query.all()
+        formatted_categories = {category.id: category.type for category in categories}
+        categories_length = len(formatted_categories)
+
+        return jsonify(
+            {
+                "success": True,
+                "categories": formatted_categories,
+                "total_categories": categories_length,
+            }
+        )
 
     """
     @TODO:
@@ -99,4 +126,3 @@ def create_app(test_config=None):
     """
 
     return app
-
