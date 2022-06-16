@@ -33,20 +33,31 @@ createbd trivia
 Populate the database using the `trivia.psql` file provided. From the `backend` folder in terminal run:
 
 ```bash
-psql trivia < trivia.psql
+psql -U postgres trivia < trivia.psql  #for windows user
 ```
 
 ### Run the Server
 
-From within the `./src` directory first ensure you are working using your created virtual environment.
+Activate the virtual environment by navigating to the directory
+
+```bash
+cd env
+cd Scripts
+activate
+```
+After go back to the `backend directory`
+
+```bash
+set FLASK_APP=app
+set FLASK_ENV=development
+```
 
 To run the server, execute:
 
 ```bash
-flask run --reload
+python app.py or flask run
 ```
 
-The `--reload` flag will detect file changes and restart the server automatically.
 
 ## To Do Tasks
 
@@ -55,44 +66,195 @@ These are the files you'd want to edit in the backend:
 1. `backend/flaskr/__init__.py`
 2. `backend/test_flaskr.py`
 
-One note before you delve into your tasks: for each endpoint, you are expected to define the endpoint and response data. The frontend will be a plentiful resource because it is set up to expect certain endpoints and response data formats already. You should feel free to specify endpoints in your own way; if you do so, make sure to update the frontend or you will get some unexpected behavior.
 
-1. Use Flask-CORS to enable cross-domain requests and set response headers.
-2. Create an endpoint to handle `GET` requests for questions, including pagination (every 10 questions). This endpoint should return a list of questions, number of total questions, current category, categories.
-3. Create an endpoint to handle `GET` requests for all available categories.
-4. Create an endpoint to `DELETE` a question using a question `ID`.
-5. Create an endpoint to `POST` a new question, which will require the question and answer text, category, and difficulty score.
-6. Create a `POST` endpoint to get questions based on category.
-7. Create a `POST` endpoint to get questions based on a search term. It should return any questions for whom the search term is a substring of the question.
-8. Create a `POST` endpoint to get questions to play the quiz. This endpoint should take a category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions.
-9. Create error handlers for all expected errors including 400, 404, 422, and 500.
+### Documentation 
 
-## Documenting your Endpoints
-
-You will need to provide detailed documentation of your API endpoints including the URL, request parameters, and the response body. Use the example below as a reference.
-
-### Documentation Example
-
-`GET '/api/v1.0/categories'`
+`GET '/api/categories'`
 
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
 - Request Arguments: None
-- Returns: An object with a single key, `categories`, that contains an object of `id: category_string` key: value pairs.
+- Returns: An object with 3 keys
+  - `success` boolean value
+  - `categories` that contains an object of id: category_string key: value pairs
+  - `total_categories` that contains total number of categories
 
 ```json
 {
-  "1": "Science",
-  "2": "Art",
-  "3": "Geography",
-  "4": "History",
-  "5": "Entertainment",
-  "6": "Sports"
+    "categories": {
+        "1": "Science",
+        "2": "Art",
+        "3": "Geography",
+        "4": "History",
+        "5": "Entertainment",
+        "6": "Sports"
+    },
+    "success": true,
+    "total_categories": 6
 }
 ```
 
-## Testing
+`GET '/api/questions'`
 
-Write at least one test for the success and at least one error behavior of each endpoint using the unittest library.
+- Fetches a dictionary of questions array, categories, current_categiory, total_questions
+- Request Arguments: None
+- Returns: An object with 5 keys
+  - `success` boolean value
+  - `categories` that contains an object of id: category_string key: value pairs
+  - `questions` that contains an array of questions
+  - `total_questions` that contains total number of questions
+  - `current_category`
+
+```json
+{
+  "success": True,
+  "questions": [ {
+            "answer": "Edward Scissorhands",
+            "category": "5",
+            "difficulty": 3,
+            "id": 6,
+            "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+        },],
+  "categories":  {
+        "1": "Science",
+        "2": "Art",
+        "3": "Geography",
+        "4": "History",
+        "5": "Entertainment",
+        "6": "Sports"
+    },
+  "total_questions": 1,
+  "current_category": 'Art',
+}
+```
+
+
+`DELETE '/api/questions/<question_id>'`
+
+- deletes the given question id from database 
+- Request Arguments: None
+- Returns: An object with 5 keys
+  - `success` boolean value
+  - `id` of item removed
+
+
+`POST '/api/questions'`
+
+- Creates a new question in the database
+- Request Arguments: Question data
+
+```json
+{
+  "question": "are you fine", 
+  "answer": "yes", 
+  "category": 2, 
+  "difficulty": 1
+}
+```
+
+- Returns: An object with 2 keys
+  - `success` boolean value
+  - `question_id` 
+  ```json
+  {
+    "question": 59,
+    "status": true
+  }
+  ```
+
+`POST '/api/questions/search'`
+
+- fetches search results matching the search term in questions table
+- Request Arguments: Search term
+
+```json
+{
+  "searchTerm": "are", 
+}
+```
+
+- Returns: An object with 3 keys
+  
+  - `success` boolean value
+  - `total_questions` that matched the search term in database
+  - `questions_array` 
+  
+  ```json
+  {
+    "questions": [
+        {
+            "answer": "yes",
+            "category": "2",
+            "difficulty": 1,
+            "id": 59,
+            "question": "are you fine"
+        }
+    ],
+    "success": true,
+    "total_questions": 1
+   }
+  ```
+
+`GET '/api/categories/<category_id>/questions'`
+
+- Fetches a dictionary of questions in the specified category
+- Request Arguments: None
+- Returns: An object with 4 keys
+  - `success` boolean value
+  - `current_category` category of the specified Id
+  - `total_questions` total questions in that category
+  - `questions` an array of the questions in the specified category 
+
+```json
+{
+    "current_category": "Art",
+    "questions": [
+        {
+            "answer": "Escher",
+            "category": "2",
+            "difficulty": 1,
+            "id": 16,
+            "question": "Which Dutch graphic artist–initials M C was a creator of optical illusions?"
+        },
+       
+    ],
+    "success": true,
+    "total_questions": 1
+}
+```
+
+`POST '/api/quizzes'`
+
+- fetches random question in a category not in previous questions
+- Request Arguments: Object with key `previous_questions` containing an array of questions IDs to exclude and a category object.
+
+```json
+{
+"previous_questions": [6, 9, 10],
+"quiz_category": {"id": "3", "type": "Geography"}
+ }
+```
+
+- Returns: An object with 2 keys
+  
+  - `success` boolean value
+  - `question` random question object
+  
+  
+  ```json
+  {
+    "question": {
+        "answer": "Agra",
+        "category": "3",
+        "difficulty": 2,
+        "id": 15,
+        "question": "The Taj Mahal is located in which Indian city?"
+    },
+    "success": true
+  }
+
+  ```
+
+## Testing
 
 To deploy the tests, run
 
