@@ -1,4 +1,3 @@
-import os
 from flaskr import create_app
 from dotenv import load_dotenv
 
