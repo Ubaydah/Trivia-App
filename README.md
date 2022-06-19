@@ -15,7 +15,7 @@ That's where you come in! Help them finish the trivia app so they can start hold
 
 ## About the Stack
 
-We started the full stack application for you. It is designed with some key functional areas:
+It is designed with some key functional areas:
 
 ### Backend
 
